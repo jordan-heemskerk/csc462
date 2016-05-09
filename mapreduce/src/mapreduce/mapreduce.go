@@ -36,6 +36,9 @@ import "hash/fnv"
 // Debugging
 const Debug = 0
 
+// TODO
+const tmpdir = "."
+
 func DPrintf(format string, a ...interface{}) (n int, err error) {
      if Debug > 0 {
      	n, err = fmt.Printf(format, a...)
@@ -134,7 +137,7 @@ func (mr *MapReduce) StartRegistrationServer() {
 
 // Name of the file that is the input for map job <MapJob>
 func MapName(fileName string, MapJob int) string {
-     return "mrtmp." + fileName + "-" + strconv.Itoa(MapJob)
+     return tmpdir+"/mrtmp." + fileName + "-" + strconv.Itoa(MapJob)
 }
 
 // Split bytes of input file into nMap splits, but split only on white space
@@ -217,6 +220,7 @@ func DoMap(JobNumber int, fileName string,
 			       log.Fatal("DoMap: create ", err)
 			       			 }
 							enc := json.NewEncoder(file)
+
 							    for e := res.Front(); e != nil; e = e.Next() {
 							    	  kv := e.Value.(KeyValue)
 								     	if hash(kv.Key)%uint32(nreduce) == uint32(r) {
@@ -231,7 +235,7 @@ func DoMap(JobNumber int, fileName string,
 }
 
 func MergeName(fileName string, ReduceJob int) string {
-     return "mrtmp." + fileName + "-res-" + strconv.Itoa(ReduceJob)
+     return tmpdir + "/mrtmp." + fileName + "-res-" + strconv.Itoa(ReduceJob)
 }
 
 // Read map outputs for partition job, sort them by key, call reduce for each
@@ -308,7 +312,7 @@ func (mr *MapReduce) Merge() {
 																	  }
 																	  sort.Strings(keys)
 
-																	  file, err := os.Create("mrtmp." + mr.file)
+																	  file, err := os.Create(tmpdir + "/mrtmp." + mr.file)
 																	  if err != nil {
 																	     log.Fatal("Merge: create ", err)
 																	     }
@@ -373,6 +377,8 @@ func (mr *MapReduce) Run() {
      mr.stats = mr.RunMaster()
      mr.Merge()
      mr.CleanupRegistration()
+
+     
 
      fmt.Printf("%s: MapReduce done\n", mr.MasterAddress)
 

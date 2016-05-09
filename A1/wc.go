@@ -25,7 +25,8 @@ func Map(value string) *list.List {
 	for k, v := range counts {
 		l.PushBack(mapreduce.KeyValue{Key: k, Value: strconv.Itoa(v)})
 	}
-	// you must determine what this function should return! :) 	
+	// you must determine what this function should return! :)
+	return l
 }
 
 
@@ -38,6 +39,19 @@ func Reduce(key string, values *list.List) string {
     //             check for an error! :) 
     //     add the integer value to the total
     // return the total
+
+	var total = 0
+	
+	for e := values.Front(); e != nil; e = e.Next() {
+       
+        if val, err := strconv.Atoi(e.Value.(string)); err == nil { 
+            total += val
+        } else {
+            fmt.Printf("Error converting the interface to an integer\n")
+        }
+	}
+
+    return strconv.Itoa(total) 
 
 }
 
